@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lending Tracker // Professional</title>
+    <!-- CSV Parser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Professional Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --text-main: #ffffff;
+            --text-muted: #cbd5e1; /* Slate 300 */
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --input-bg: rgba(0, 0, 0, 0.2);
+            /* Standard Professional Font Stack */
+            --font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased; /* Crisper text */
+            
+            /* Professional Gradient Background */
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #1e1b4b);
+            background-size: 400% 400%;
+            animation: gradientBG 20s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            position: relative;
+        }
+
+        /* --- Header --- */
+        header { text-align: center; margin-bottom: 35px; }
+        h1 { 
+            margin: 0; 
+            font-weight: 700; 
+            font-size: 2rem; 
+            letter-spacing: -0.5px; /* Tighter tracking for modern look */
+        }
+        p { color: var(--text-muted); margin-top: 6px; font-size: 0.95rem; font-weight: 400; }
+
+        /* --- Glass Cards --- */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- Total Card --- */
+        .summary-card {
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .summary-card h2 { margin: 4px 0 0 0; font-size: 3.2rem; font-weight: 700; letter-spacing: -1px; }
+        .summary-card p { margin: 0; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; font-weight: 600; }
+
+        /* --- Import Section --- */
+        .import-section {
+            padding: 16px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 1px dashed rgba(255,255,255,0.3);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            transition: all 0.2s;
+        }
+        .import-section:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.6); }
+        .custom-file-upload { cursor: pointer; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        input[type="file"] { display: none; }
+
+        /* --- Input Form --- */
+        .input-group {
+            padding: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            align-items: stretch;
+        }
+        
+        .input-wrapper { flex: 1; min-width: 140px; }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 14px 16px;
+            background: var(--input-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            font-family: var(--font-family);
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.2s;
+        }
+        input::placeholder { color: rgba(255,255,255,0.4); }
+        input:focus { 
+            background: rgba(0,0,0,0.3);
+            border-color: rgba(255,255,255,0.4); 
+        }
+
+        /* --- ACTION BUTTON --- */
+        .action-btn {
+            flex: 0 0 auto;
+            min-width: 120px;
+            padding: 0 24px;
+            border: none;
+            border-radius: 8px; /* Slightly squarer for professional look */
+            color: white;
+            font-family: var(--font-family);
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            
+            /* Professional Gradient */
+            background: linear-gradient(135deg, #0ea5e9, #2563eb); /* Sky to Blue */
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s ease;
+            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .action-btn.is-editing {
+            background: linear-gradient(135deg, #f59e0b, #d97706); /* Amber */
+        }
+
+        .cancel-edit-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-muted);
+            padding: 0 16px; border-radius: 8px; cursor: pointer; display: none; font-weight: 500;
+            font-family: var(--font-family); margin-right: 4px;
+        }
+        .cancel-edit-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        /* --- Search Bar --- */
+        .search-container { position: relative; margin-bottom: 25px; }
+        .search-input {
+            padding-left: 48px;
+            border-radius: 50px; /* Fully rounded search */
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.95rem;
+        }
+        
+        /* Centering the Search Icon */
+        .search-icon {
+            position: absolute; 
+            left: 18px; 
+            top: 50%; 
+            transform: translateY(-50%); /* Perfect vertical center */
+            opacity: 0.7; 
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        /* --- List Items --- */
+        .list-header {
+            display: flex; justify-content: space-between; margin-bottom: 12px; padding: 0 8px;
+            align-items: center;
+        }
+        .list-header span { font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+        
+        .clear-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem; font-family: var(--font-family); font-weight: 500; }
+        .clear-btn:hover { text-decoration: underline; color: #f87171; }
+
+        .item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 10px;
+            padding: 18px 24px;
+            border-radius: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .item:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .item-info { display: flex; flex-direction: column; gap: 4px; }
+        .item-name { font-weight: 600; font-size: 1.05rem; color: white; }
+        .item-meta { font-size: 0.85rem; color: var(--text-muted); display: flex; gap: 10px; align-items: center; }
+        
+        .purpose-tag {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500;
+        }
+
+        .item-amount { 
+            font-weight: 600; 
+            color: #38bdf8; /* Light Blue */
+            font-size: 1.1rem; 
+            margin-right: 16px;
+        }
+
+        .item-actions { display: flex; align-items: center; gap: 10px; }
+        
+        /* --- FIXED ICON BUTTONS --- */
+        .icon-btn {
+            background: rgba(255,255,255,0.08); 
+            border: 1px solid transparent; 
+            width: 36px; 
+            height: 36px; 
+            border-radius: 8px; /* Softer corners */
+            cursor: pointer; 
+            
+            /* Flex centering ensures Emoji/Icon fits perfectly */
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            
+            transition: all 0.2s; 
+            font-size: 1.1rem; /* Adjusted for better fit */
+            line-height: 1; /* Removes vertical gap issues */
+            color: var(--text-muted);
+            padding: 0;
+        }
+        
+        .edit-btn:hover { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3); }
+        .delete-btn:hover { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+
+        .empty-state { padding: 40px; text-align: center; color: var(--text-muted); font-size: 0.95rem; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Lending Tracker</h1>
+        <p>Financial Dashboard</p>
+    </header>
+
+    <div class="glass-panel summary-card">
+        <p id="totalLabel">Total Outstanding</p>
+        <h2 id="totalDisplay">₹0.00</h2>
+    </div>
+
+    <!-- Import -->
+    <div class="import-section">
+        <label for="csvInput" class="custom-file-upload">
+            <span>📂</span> Import CSV File
+        </label>
+        <input type="file" id="csvInput" accept=".csv">
+    </div>
+
+    <!-- Form -->
+    <form class="glass-panel input-group" id="trackerForm">
+        <div class="input-wrapper" style="flex:2;">
+            <input type="text" id="nameInput" placeholder="Person's Name" required>
+        </div>
+        <div class="input-wrapper" style="flex:2;">
+            <input type="text" id="purposeInput" placeholder="Purpose (e.g. Lunch)">
+        </div>
+        <div class="input-wrapper">
+            <input type="text" id="amountInput" placeholder="Amount (e.g. 500+200)" required autocomplete="off">
+        </div>
+        
+        <button type="button" id="cancelEditBtn" class="cancel-edit-btn">Cancel</button>
+        
+        <button type="submit" id="submitBtn" class="action-btn">Add</button>
+    </form>
+
+    <!-- Search -->
+    <div class="search-container">
+        <div class="search-icon">🔍</div>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by name...">
+    </div>
+
+    <div class="list-header">
+        <span>Transaction History</span>
+        <button class="clear-btn" onclick="clearAllData()">Reset All</button>
+    </div>
+
+    <div class="list-container" id="listContainer"></div>
+</div>
+
+<script>
+    // --- Elements ---
+    const form = document.getElementById('trackerForm');
+    const nameInput = document.getElementById('nameInput');
+    const purposeInput = document.getElementById('purposeInput');
+    const amountInput = document.getElementById('amountInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const listContainer = document.getElementById('listContainer');
+    const totalDisplay = document.getElementById('totalDisplay');
+    const totalLabel = document.getElementById('totalLabel');
+    const csvInput = document.getElementById('csvInput');
+    const searchInput = document.getElementById('searchInput');
+
+    let transactions = JSON.parse(localStorage.getItem('lendingData')) || [];
+    let editingIndex = null; 
+
+    // --- MATH ENGINE ---
+    function calculateAmount(inputStr) {
+        const sanitized = inputStr.replace(/[^0-9\+\-\*\/\.\(\)\s]/g, '');
+        try {
+            const result = new Function('return ' + sanitized)();
+            return (typeof result === 'number' && !isNaN(result)) ? result : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // --- CSV Import ---
+    csvInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        Papa.parse(file, {
+            header: false,
+            skipEmptyLines: true,
+            complete: function(results) {
+                let count = 0;
+                results.data.forEach((row) => {
+                    let rawDate = row[0];
+                    let rawName = row[1];
+                    let rawAmount = row[2];
+                    let rawPurpose = row[3] || ""; 
+
+                    if(rawAmount) {
+                        let cleanAmount = String(rawAmount).replace(/[^0-9.-]+/g,"");
+                        let parsedAmount = parseFloat(cleanAmount);
+                        if (rawName && !isNaN(parsedAmount) && parsedAmount > 0) {
+                            if(rawName.toLowerCase() !== 'name') {
+                                transactions.unshift({
+                                    name: rawName,
+                                    amount: parsedAmount,
+                                    date: rawDate || new Date().toLocaleDateString('en-IN'),
+                                    purpose: rawPurpose
+                                });
+                                count++;
+                            }
+                        }
+                    }
+                });
+                saveAndRender();
+                if(count > 0) alert(`Successfully imported ${count} records.`);
+                csvInput.value = "";
+            }
+        });
+    });
+
+    // --- Render Logic ---
+    function render() {
+        listContainer.innerHTML = '';
+        
+        let filteredTotal = 0;
+        let visibleCount = 0;
+        const searchQuery = searchInput.value.toLowerCase().trim();
+
+        if (transactions.length === 0) {
+            listContainer.innerHTML = '<div class="empty-state">No transactions yet.</div>';
+            totalDisplay.innerText = formatINR(0);
+            return;
+        }
+
+        transactions.forEach((t, index) => {
+            if (t.name.toLowerCase().includes(searchQuery)) {
+                filteredTotal += parseFloat(t.amount);
+                visibleCount++;
+
+                const purposeHtml = t.purpose 
+                    ? `<span class="purpose-tag">${t.purpose}</span>` 
+                    : '';
+
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <span class="item-name">${t.name}</span>
+                        <span class="item-meta">
+                            ${t.date} ${purposeHtml}
+                        </span>
+                    </div>
+                    <div class="item-actions">
+                        <span class="item-amount">${formatINR(t.amount)}</span>
+                        <button class="icon-btn edit-btn" onclick="startEdit(${index})" title="Edit">✎</button>
+                        <button class="icon-btn delete-btn" onclick="deleteItem(${index})" title="Remove">✕</button>
+                    </div>
+                `;
+                listContainer.appendChild(div);
+            }
+        });
+
+        totalDisplay.innerText = formatINR(filteredTotal);
+        
+        if (searchQuery.length > 0) {
+            totalLabel.innerText = `Total for "${searchInput.value}"`;
+            if(visibleCount === 0) listContainer.innerHTML = '<div class="empty-state">No results found.</div>';
+        } else {
+            totalLabel.innerText = "Total Outstanding";
+        }
+    }
+
+    searchInput.addEventListener('input', render);
+
+    function formatINR(num) {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0 
+        }).format(num);
+    }
+
+    // --- Add / Update Logic ---
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const rawAmountStr = amountInput.value;
+        const calculatedAmount = calculateAmount(rawAmountStr);
+
+        if (calculatedAmount === null || calculatedAmount <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+        }
+        
+        if (editingIndex !== null) {
+            transactions[editingIndex].name = nameInput.value;
+            transactions[editingIndex].purpose = purposeInput.value;
+            transactions[editingIndex].amount = calculatedAmount;
+            stopEditing();
+        } else {
+            const newTransaction = {
+                name: nameInput.value,
+                amount: calculatedAmount,
+                date: new Date().toLocaleDateString('en-IN'),
+                purpose: purposeInput.value
+            };
+            transactions.unshift(newTransaction);
+        }
+
+        saveAndRender();
+        form.reset();
+        nameInput.focus();
+    });
+
+    // --- Edit Mode ---
+    window.startEdit = (index) => {
+        const item = transactions[index];
+        nameInput.value = item.name;
+        purposeInput.value = item.purpose || "";
+        amountInput.value = item.amount;
+
+        editingIndex = index;
+        
+        submitBtn.innerText = "Update";
+        submitBtn.classList.add("is-editing");
+        cancelEditBtn.style.display = "inline-block";
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        amountInput.focus();
+    };
+
+    function stopEditing() {
+        editingIndex = null;
+        submitBtn.innerText = "Add";
+        submitBtn.classList.remove("is-editing");
+        cancelEditBtn.style.display = "none";
+        form.reset();
+    }
+
+    cancelEditBtn.addEventListener('click', stopEditing);
+
+    // --- Delete / Clear ---
+    window.deleteItem = (index) => {
+        if(editingIndex === index) stopEditing();
+        if(confirm('Remove this entry?')) {
+            transactions.splice(index, 1);
+            saveAndRender();
+        }
+    };
+
+    window.clearAllData = () => {
+        if(confirm('Are you sure you want to delete ALL data?')) {
+            transactions = [];
+            stopEditing();
+            saveAndRender();
+        }
+    };
+
+    function saveAndRender() {
+        localStorage.setItem('lendingData', JSON.stringify(transactions));
+        render(); 
+    }
+
+    render();
+</script>
+
+</body>
+</html>
