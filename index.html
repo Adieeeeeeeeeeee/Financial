@@ -3,35 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lending Tracker // Professional</title>
-    <!-- CSV Parser -->
+    <title>Lending Tracker // Live Minimal</title>
+    
+    <!-- Libraries for Import/Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- Professional Font: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --text-main: #ffffff;
-            --text-muted: #cbd5e1; /* Slate 300 */
-            --glass-bg: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --input-bg: rgba(0, 0, 0, 0.2);
-            /* Standard Professional Font Stack */
-            --font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            /* Palette */
+            --surface: rgba(23, 23, 23, 0.6); /* Semi-transparent for glass effect */
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ededed;
+            --text-muted: #888888;
+            --accent: #ffffff;
+            --danger: #ef4444;
+            
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
             font-family: var(--font-family);
+            color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            color: var(--text-main);
-            -webkit-font-smoothing: antialiased; /* Crisper text */
+            -webkit-font-smoothing: antialiased;
             
-            /* Professional Gradient Background */
-            background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #1e1b4b);
+            /* --- LIVE BACKGROUND --- */
+            /* Deep Charcoal -> Midnight Blue -> Deep Slate */
+            background: linear-gradient(-45deg, #050505, #111111, #0f172a, #1a1a1a);
             background-size: 400% 400%;
             animation: gradientBG 20s ease infinite;
         }
@@ -44,216 +50,231 @@
 
         .container {
             width: 100%;
-            max-width: 720px;
+            max-width: 680px;
             position: relative;
         }
 
         /* --- Header --- */
-        header { text-align: center; margin-bottom: 35px; }
+        header { margin-bottom: 40px; }
         h1 { 
+            font-size: 1.5rem; 
+            font-weight: 600; 
             margin: 0; 
-            font-weight: 700; 
-            font-size: 2rem; 
-            letter-spacing: -0.5px; /* Tighter tracking for modern look */
+            letter-spacing: -0.02em;
         }
-        p { color: var(--text-muted); margin-top: 6px; font-size: 0.95rem; font-weight: 400; }
-
-        /* --- Glass Cards --- */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+        p { 
+            color: var(--text-muted); 
+            font-size: 0.875rem; 
+            margin-top: 6px; 
         }
 
-        /* --- Total Card --- */
-        .summary-card {
-            padding: 32px;
-            text-align: center;
+        /* --- Total Display --- */
+        .total-section {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
             margin-bottom: 30px;
         }
-        .summary-card h2 { margin: 4px 0 0 0; font-size: 3.2rem; font-weight: 700; letter-spacing: -1px; }
-        .summary-card p { margin: 0; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; font-weight: 600; }
-
-        /* --- Import Section --- */
-        .import-section {
-            padding: 16px;
-            margin-bottom: 25px;
-            text-align: center;
-            border: 1px dashed rgba(255,255,255,0.3);
-            border-radius: 8px;
-            background: rgba(255,255,255,0.03);
-            transition: all 0.2s;
+        .total-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
         }
-        .import-section:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.6); }
-        .custom-file-upload { cursor: pointer; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .total-amount {
+            font-size: 3rem;
+            font-weight: 500;
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+
+        /* --- Toolbar (Import/Export) --- */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            backdrop-filter: blur(5px); /* Glass effect */
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-muted);
+            background: rgba(255,255,255,0.1);
+        }
+
         input[type="file"] { display: none; }
 
         /* --- Input Form --- */
         .input-group {
-            padding: 24px;
-            display: flex;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr auto;
             gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 30px;
-            align-items: stretch;
+            margin-bottom: 40px;
+            align-items: center;
         }
-        
-        .input-wrapper { flex: 1; min-width: 140px; }
 
         input {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 14px 16px;
-            background: var(--input-bg);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: white;
-            font-family: var(--font-family);
-            font-size: 0.95rem;
-            outline: none;
-            transition: 0.2s;
-        }
-        input::placeholder { color: rgba(255,255,255,0.4); }
-        input:focus { 
-            background: rgba(0,0,0,0.3);
-            border-color: rgba(255,255,255,0.4); 
-        }
-
-        /* --- ACTION BUTTON --- */
-        .action-btn {
-            flex: 0 0 auto;
-            min-width: 120px;
-            padding: 0 24px;
+            background: transparent;
             border: none;
-            border-radius: 8px; /* Slightly squarer for professional look */
-            color: white;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px 0;
             font-family: var(--font-family);
-            font-weight: 600;
-            font-size: 1rem;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            
-            /* Professional Gradient */
-            background: linear-gradient(135deg, #0ea5e9, #2563eb); /* Sky to Blue */
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            transition: all 0.2s ease;
-            
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
-            filter: brightness(1.1);
-        }
-
-        .action-btn.is-editing {
-            background: linear-gradient(135deg, #f59e0b, #d97706); /* Amber */
-        }
-
-        .cancel-edit-btn {
-            background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-muted);
-            padding: 0 16px; border-radius: 8px; cursor: pointer; display: none; font-weight: 500;
-            font-family: var(--font-family); margin-right: 4px;
-        }
-        .cancel-edit-btn:hover { background: rgba(255,255,255,0.1); color: white; }
-
-        /* --- Search Bar --- */
-        .search-container { position: relative; margin-bottom: 25px; }
-        .search-input {
-            padding-left: 48px;
-            border-radius: 50px; /* Fully rounded search */
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.1);
             font-size: 0.95rem;
+            border-radius: 0;
+            transition: border-color 0.2s;
         }
         
-        /* Centering the Search Icon */
+        input:focus {
+            outline: none;
+            border-bottom-color: var(--accent);
+        }
+        
+        input::placeholder { color: #404040; }
+
+        /* --- Main Action Button --- */
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+        
+        .btn-primary.is-editing { background: #f59e0b; }
+
+        .cancel-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .cancel-btn:hover { color: var(--text-main); }
+
+        /* --- Search --- */
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
         .search-icon {
-            position: absolute; 
-            left: 18px; 
-            top: 50%; 
-            transform: translateY(-50%); /* Perfect vertical center */
-            opacity: 0.7; 
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 16px;
+            height: 16px;
+        }
+        .search-input {
+            width: 100%;
+            padding-left: 28px;
+            font-size: 0.9rem;
         }
 
-        /* --- List Items --- */
+        /* --- List --- */
         .list-header {
-            display: flex; justify-content: space-between; margin-bottom: 12px; padding: 0 8px;
-            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+            padding: 0 4px;
         }
-        .list-header span { font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
         
-        .clear-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem; font-family: var(--font-family); font-weight: 500; }
-        .clear-btn:hover { text-decoration: underline; color: #f87171; }
+        .reset-link {
+            background: none; border: none; padding: 0;
+            color: var(--text-muted); cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .reset-link:hover { color: var(--danger); }
 
         .item {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 10px;
-            padding: 18px 24px;
-            border-radius: 10px;
-            display: flex; justify-content: space-between; align-items: center;
-            transition: transform 0.2s, background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 4px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.1s;
         }
-        .item:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
+        .item:hover { background: rgba(255,255,255,0.03); }
 
-        .item-info { display: flex; flex-direction: column; gap: 4px; }
-        .item-name { font-weight: 600; font-size: 1.05rem; color: white; }
-        .item-meta { font-size: 0.85rem; color: var(--text-muted); display: flex; gap: 10px; align-items: center; }
-        
-        .purpose-tag {
-            background: rgba(255,255,255,0.1);
-            padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500;
+        .item-details h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin: 0 0 4px 0;
+            color: var(--text-main);
         }
-
-        .item-amount { 
-            font-weight: 600; 
-            color: #38bdf8; /* Light Blue */
-            font-size: 1.1rem; 
-            margin-right: 16px;
-        }
-
-        .item-actions { display: flex; align-items: center; gap: 10px; }
-        
-        /* --- FIXED ICON BUTTONS --- */
-        .icon-btn {
-            background: rgba(255,255,255,0.08); 
-            border: 1px solid transparent; 
-            width: 36px; 
-            height: 36px; 
-            border-radius: 8px; /* Softer corners */
-            cursor: pointer; 
-            
-            /* Flex centering ensures Emoji/Icon fits perfectly */
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            
-            transition: all 0.2s; 
-            font-size: 1.1rem; /* Adjusted for better fit */
-            line-height: 1; /* Removes vertical gap issues */
+        .item-meta {
+            font-size: 0.8rem;
             color: var(--text-muted);
-            padding: 0;
+        }
+
+        .item-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
         
-        .edit-btn:hover { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3); }
-        .delete-btn:hover { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+        .amount {
+            font-weight: 500;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
 
-        .empty-state { padding: 40px; text-align: center; color: var(--text-muted); font-size: 0.95rem; }
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            opacity: 0.6;
+            transition: opacity 0.2s, color 0.2s;
+        }
+        .icon-btn:hover { opacity: 1; color: var(--accent); }
+        .icon-btn.delete:hover { color: var(--danger); }
 
+        .empty-state {
+            text-align: center;
+            padding: 60px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* SVG Sizing */
+        svg { width: 18px; height: 18px; stroke-width: 2; }
+
+        @media (max-width: 600px) {
+            .input-group { grid-template-columns: 1fr; gap: 16px; }
+            .toolbar { overflow-x: auto; padding-bottom: 10px; }
+            .btn-secondary { white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
@@ -261,51 +282,62 @@
 <div class="container">
     <header>
         <h1>Lending Tracker</h1>
-        <p>Financial Dashboard</p>
+        <p>Live Minimalist Overview</p>
     </header>
 
-    <div class="glass-panel summary-card">
-        <p id="totalLabel">Total Outstanding</p>
-        <h2 id="totalDisplay">₹0.00</h2>
+    <div class="total-section">
+        <span class="total-label" id="totalLabel">Total Outstanding</span>
+        <div class="total-amount" id="totalDisplay">₹0.00</div>
     </div>
 
-    <!-- Import -->
-    <div class="import-section">
-        <label for="csvInput" class="custom-file-upload">
-            <span>📂</span> Import CSV File
+    <!-- Toolbar: Import & Exports -->
+    <div class="toolbar">
+        <label for="fileInput" class="btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Import
         </label>
-        <input type="file" id="csvInput" accept=".csv">
+        <input type="file" id="fileInput" accept=".csv, .xlsx, .xls, .json">
+
+        <button class="btn-secondary" onclick="exportExcel()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="8" x2="8" y2="8"></line><line x1="16" y1="16" x2="8" y2="16"></line><line x1="10" y1="12" x2="3" y2="12"></line></svg>
+            Excel
+        </button>
+
+        <button class="btn-secondary" onclick="exportCSV()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            CSV
+        </button>
+
+        <button class="btn-secondary" onclick="exportJSON()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            JSON
+        </button>
     </div>
 
-    <!-- Form -->
-    <form class="glass-panel input-group" id="trackerForm">
-        <div class="input-wrapper" style="flex:2;">
-            <input type="text" id="nameInput" placeholder="Person's Name" required>
-        </div>
-        <div class="input-wrapper" style="flex:2;">
-            <input type="text" id="purposeInput" placeholder="Purpose (e.g. Lunch)">
-        </div>
-        <div class="input-wrapper">
-            <input type="text" id="amountInput" placeholder="Amount (e.g. 500+200)" required autocomplete="off">
-        </div>
+    <!-- Input Form -->
+    <form class="input-group" id="trackerForm">
+        <input type="text" id="nameInput" placeholder="Name" required>
+        <input type="text" id="purposeInput" placeholder="Purpose">
+        <input type="text" id="amountInput" placeholder="Amount (e.g. 500+200)" required autocomplete="off">
         
-        <button type="button" id="cancelEditBtn" class="cancel-edit-btn">Cancel</button>
-        
-        <button type="submit" id="submitBtn" class="action-btn">Add</button>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <button type="button" id="cancelEditBtn" class="cancel-btn">Cancel</button>
+            <button type="submit" id="submitBtn" class="btn-primary">Add</button>
+        </div>
     </form>
 
     <!-- Search -->
-    <div class="search-container">
-        <div class="search-icon">🔍</div>
-        <input type="text" id="searchInput" class="search-input" placeholder="Search by name...">
+    <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchInput" class="search-input" placeholder="Filter by name...">
     </div>
 
+    <!-- List -->
     <div class="list-header">
-        <span>Transaction History</span>
-        <button class="clear-btn" onclick="clearAllData()">Reset All</button>
+        <span>Transactions</span>
+        <button class="reset-link" onclick="clearAllData()">Reset All</button>
     </div>
-
-    <div class="list-container" id="listContainer"></div>
+    <div id="listContainer"></div>
 </div>
 
 <script>
@@ -319,72 +351,147 @@
     const listContainer = document.getElementById('listContainer');
     const totalDisplay = document.getElementById('totalDisplay');
     const totalLabel = document.getElementById('totalLabel');
-    const csvInput = document.getElementById('csvInput');
+    const fileInput = document.getElementById('fileInput');
     const searchInput = document.getElementById('searchInput');
 
     let transactions = JSON.parse(localStorage.getItem('lendingData')) || [];
     let editingIndex = null; 
 
-    // --- MATH ENGINE ---
+    // --- MATH LOGIC ---
     function calculateAmount(inputStr) {
         const sanitized = inputStr.replace(/[^0-9\+\-\*\/\.\(\)\s]/g, '');
         try {
             const result = new Function('return ' + sanitized)();
             return (typeof result === 'number' && !isNaN(result)) ? result : null;
-        } catch (e) {
-            return null;
-        }
+        } catch (e) { return null; }
     }
 
-    // --- CSV Import ---
-    csvInput.addEventListener('change', function(event) {
+    // --- IMPORT LOGIC (Multi-Format) ---
+    fileInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (!file) return;
 
-        Papa.parse(file, {
-            header: false,
-            skipEmptyLines: true,
-            complete: function(results) {
-                let count = 0;
-                results.data.forEach((row) => {
-                    let rawDate = row[0];
-                    let rawName = row[1];
-                    let rawAmount = row[2];
-                    let rawPurpose = row[3] || ""; 
+        const fileName = file.name.toLowerCase();
 
-                    if(rawAmount) {
-                        let cleanAmount = String(rawAmount).replace(/[^0-9.-]+/g,"");
-                        let parsedAmount = parseFloat(cleanAmount);
-                        if (rawName && !isNaN(parsedAmount) && parsedAmount > 0) {
-                            if(rawName.toLowerCase() !== 'name') {
-                                transactions.unshift({
-                                    name: rawName,
-                                    amount: parsedAmount,
-                                    date: rawDate || new Date().toLocaleDateString('en-IN'),
-                                    purpose: rawPurpose
-                                });
-                                count++;
-                            }
-                        }
+        // 1. JSON
+        if (fileName.endsWith('.json')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    if (Array.isArray(json)) {
+                        json.forEach(item => { if(item.name && item.amount) transactions.unshift(item); });
+                        finishImport(json.length);
                     }
-                });
-                saveAndRender();
-                if(count > 0) alert(`Successfully imported ${count} records.`);
-                csvInput.value = "";
+                } catch (err) { alert("Invalid JSON"); }
+            };
+            reader.readAsText(file);
+        } 
+        // 2. Excel
+        else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                processRowData(rows);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        // 3. CSV
+        else if (fileName.endsWith('.csv')) {
+            Papa.parse(file, {
+                header: false,
+                skipEmptyLines: true,
+                complete: function(results) { processRowData(results.data); }
+            });
+        }
+    });
+
+    function processRowData(rows) {
+        let count = 0;
+        rows.forEach((row) => {
+            let rawDate = row[0];
+            let rawName = row[1];
+            let rawAmount = row[2];
+            let rawPurpose = row[3] || ""; 
+            if(rawAmount) {
+                let cleanAmount = String(rawAmount).replace(/[^0-9.-]+/g,"");
+                let parsedAmount = parseFloat(cleanAmount);
+                if (rawName && !isNaN(parsedAmount) && parsedAmount > 0) {
+                    if(String(rawName).toLowerCase() !== 'name') {
+                        transactions.unshift({
+                            name: rawName,
+                            amount: parsedAmount,
+                            date: rawDate || new Date().toLocaleDateString('en-IN'),
+                            purpose: rawPurpose
+                        });
+                        count++;
+                    }
+                }
             }
         });
-    });
+        finishImport(count);
+    }
+
+    function finishImport(count) {
+        saveAndRender();
+        if(count > 0) alert(`Imported ${count} entries.`);
+        fileInput.value = "";
+    }
+
+    // --- EXPORT LOGIC (Multi-Format) ---
+    function exportExcel() {
+        if(transactions.length === 0) return alert("No data.");
+        const data = transactions.map(t => ({
+            "Date": t.date,
+            "Name": t.name,
+            "Amount": t.amount,
+            "Purpose": t.purpose || ""
+        }));
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Lending Data");
+        XLSX.writeFile(wb, "Lending_Tracker.xlsx");
+    }
+
+    function exportCSV() {
+        if(transactions.length === 0) return alert("No data.");
+        let csv = "Date,Name,Amount,Purpose\n";
+        transactions.forEach(t => {
+            let safeName = t.name.replace(/"/g, '""');
+            let safePurpose = (t.purpose || "").replace(/"/g, '""');
+            csv += `"${t.date}","${safeName}","${t.amount}","${safePurpose}"\n`;
+        });
+        downloadFile(csv, "Lending_Tracker.csv", "text/csv");
+    }
+
+    function exportJSON() {
+        if(transactions.length === 0) return alert("No data.");
+        const jsonStr = JSON.stringify(transactions, null, 2);
+        downloadFile(jsonStr, "Lending_Tracker.json", "application/json");
+    }
+
+    function downloadFile(content, fileName, mimeType) {
+        const blob = new Blob(["\uFEFF"+content], { type: mimeType + ";charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 
     // --- Render Logic ---
     function render() {
         listContainer.innerHTML = '';
-        
         let filteredTotal = 0;
         let visibleCount = 0;
         const searchQuery = searchInput.value.toLowerCase().trim();
 
         if (transactions.length === 0) {
-            listContainer.innerHTML = '<div class="empty-state">No transactions yet.</div>';
+            listContainer.innerHTML = '<div class="empty-state">No transactions recorded.</div>';
             totalDisplay.innerText = formatINR(0);
             return;
         }
@@ -394,23 +501,25 @@
                 filteredTotal += parseFloat(t.amount);
                 visibleCount++;
 
-                const purposeHtml = t.purpose 
-                    ? `<span class="purpose-tag">${t.purpose}</span>` 
-                    : '';
-
                 const div = document.createElement('div');
                 div.className = 'item';
                 div.innerHTML = `
-                    <div class="item-info">
-                        <span class="item-name">${t.name}</span>
-                        <span class="item-meta">
-                            ${t.date} ${purposeHtml}
-                        </span>
+                    <div class="item-details">
+                        <h3>${t.name}</h3>
+                        <div class="item-meta">
+                            ${t.date} ${t.purpose ? '• ' + t.purpose : ''}
+                        </div>
                     </div>
-                    <div class="item-actions">
-                        <span class="item-amount">${formatINR(t.amount)}</span>
-                        <button class="icon-btn edit-btn" onclick="startEdit(${index})" title="Edit">✎</button>
-                        <button class="icon-btn delete-btn" onclick="deleteItem(${index})" title="Remove">✕</button>
+                    <div class="item-right">
+                        <span class="amount">${formatINR(t.amount)}</span>
+                        
+                        <button class="icon-btn" onclick="startEdit(${index})" title="Edit">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        
+                        <button class="icon-btn delete" onclick="deleteItem(${index})" title="Delete">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
                     </div>
                 `;
                 listContainer.appendChild(div);
@@ -418,10 +527,9 @@
         });
 
         totalDisplay.innerText = formatINR(filteredTotal);
-        
         if (searchQuery.length > 0) {
             totalLabel.innerText = `Total for "${searchInput.value}"`;
-            if(visibleCount === 0) listContainer.innerHTML = '<div class="empty-state">No results found.</div>';
+            if(visibleCount === 0) listContainer.innerHTML = '<div class="empty-state">No results.</div>';
         } else {
             totalLabel.innerText = "Total Outstanding";
         }
@@ -437,15 +545,14 @@
         }).format(num);
     }
 
-    // --- Add / Update Logic ---
+    // --- Form Logic ---
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-
         const rawAmountStr = amountInput.value;
         const calculatedAmount = calculateAmount(rawAmountStr);
 
         if (calculatedAmount === null || calculatedAmount <= 0) {
-            alert("Please enter a valid amount.");
+            alert("Please check the amount.");
             return;
         }
         
@@ -463,25 +570,20 @@
             };
             transactions.unshift(newTransaction);
         }
-
         saveAndRender();
         form.reset();
         nameInput.focus();
     });
 
-    // --- Edit Mode ---
     window.startEdit = (index) => {
         const item = transactions[index];
         nameInput.value = item.name;
         purposeInput.value = item.purpose || "";
         amountInput.value = item.amount;
-
         editingIndex = index;
-        
-        submitBtn.innerText = "Update";
+        submitBtn.innerText = "Save";
         submitBtn.classList.add("is-editing");
-        cancelEditBtn.style.display = "inline-block";
-        
+        cancelEditBtn.style.display = "block";
         window.scrollTo({ top: 0, behavior: 'smooth' });
         amountInput.focus();
     };
@@ -493,10 +595,8 @@
         cancelEditBtn.style.display = "none";
         form.reset();
     }
-
     cancelEditBtn.addEventListener('click', stopEditing);
 
-    // --- Delete / Clear ---
     window.deleteItem = (index) => {
         if(editingIndex === index) stopEditing();
         if(confirm('Remove this entry?')) {
@@ -506,7 +606,7 @@
     };
 
     window.clearAllData = () => {
-        if(confirm('Are you sure you want to delete ALL data?')) {
+        if(confirm('This will delete all data. Continue?')) {
             transactions = [];
             stopEditing();
             saveAndRender();
