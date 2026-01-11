@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lending Tracker // Live Minimal</title>
+    <title>Lending Tracker // Live</title>
     
-    <!-- Libraries for Import/Export -->
+    <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
@@ -14,15 +14,13 @@
     
     <style>
         :root {
-            /* Palette */
-            --surface: rgba(23, 23, 23, 0.6); /* Semi-transparent for glass effect */
+            --surface: rgba(23, 23, 23, 0.6);
             --border: rgba(255, 255, 255, 0.1);
             --text-main: #ededed;
             --text-muted: #888888;
             --accent: #ffffff;
             --danger: #ef4444;
-            
-            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-family: 'Inter', -apple-system, sans-serif;
         }
 
         body {
@@ -35,8 +33,7 @@
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             
-            /* --- LIVE BACKGROUND --- */
-            /* Deep Charcoal -> Midnight Blue -> Deep Slate */
+            /* Live Deep Background */
             background: linear-gradient(-45deg, #050505, #111111, #0f172a, #1a1a1a);
             background-size: 400% 400%;
             animation: gradientBG 20s ease infinite;
@@ -50,29 +47,105 @@
 
         .container {
             width: 100%;
-            max-width: 680px;
+            max-width: 750px;
             position: relative;
         }
 
-        /* --- Header --- */
-        header { margin-bottom: 40px; }
-        h1 { 
-            font-size: 1.5rem; 
-            font-weight: 600; 
-            margin: 0; 
+        /* --- New Header Layout --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 50px;
+        }
+
+        .header-left h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
             letter-spacing: -0.02em;
         }
-        p { 
-            color: var(--text-muted); 
-            font-size: 0.875rem; 
-            margin-top: 6px; 
+        .header-left p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 6px;
         }
+
+        /* --- Top Right Actions --- */
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            position: relative;
+        }
+
+        .btn-header {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            backdrop-filter: blur(5px);
+            font-weight: 500;
+        }
+
+        .btn-header:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Export Dropdown */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            background: #1a1a1a;
+            border: 1px solid var(--border);
+            min-width: 140px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            border-radius: 8px;
+            z-index: 10;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .dropdown-content a {
+            color: var(--text-main);
+            padding: 10px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .dropdown-content a:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* Show dropdown on hover */
+        .dropdown:hover .dropdown-content { display: block; }
+
+        input[type="file"] { display: none; }
 
         /* --- Total Display --- */
         .total-section {
-            padding: 24px 0;
+            padding-bottom: 24px;
             border-bottom: 1px solid var(--border);
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
         .total-label {
             font-size: 0.75rem;
@@ -83,42 +156,11 @@
             display: block;
         }
         .total-amount {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 500;
             letter-spacing: -0.03em;
             line-height: 1;
         }
-
-        /* --- Toolbar (Import/Export) --- */
-        .toolbar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .btn-secondary {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 10px 16px;
-            font-size: 0.85rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            backdrop-filter: blur(5px); /* Glass effect */
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--text-muted);
-            background: rgba(255,255,255,0.1);
-        }
-
-        input[type="file"] { display: none; }
 
         /* --- Input Form --- */
         .input-group {
@@ -141,14 +183,9 @@
             transition: border-color 0.2s;
         }
         
-        input:focus {
-            outline: none;
-            border-bottom-color: var(--accent);
-        }
-        
+        input:focus { outline: none; border-bottom-color: var(--accent); }
         input::placeholder { color: #404040; }
 
-        /* --- Main Action Button --- */
         .btn-primary {
             background: var(--accent);
             color: #000;
@@ -161,119 +198,62 @@
             transition: transform 0.1s;
         }
         .btn-primary:active { transform: scale(0.98); }
-        
         .btn-primary.is-editing { background: #f59e0b; }
 
         .cancel-btn {
-            display: none;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 0.85rem;
+            display: none; background: transparent; border: none;
+            color: var(--text-muted); cursor: pointer; font-size: 0.85rem;
         }
         .cancel-btn:hover { color: var(--text-main); }
 
-        /* --- Search --- */
-        .search-wrapper {
-            position: relative;
-            margin-bottom: 20px;
-        }
+        /* --- Search & List --- */
+        .search-wrapper { position: relative; margin-bottom: 20px; }
         .search-icon {
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            width: 16px;
-            height: 16px;
+            position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); width: 16px; height: 16px;
         }
-        .search-input {
-            width: 100%;
-            padding-left: 28px;
-            font-size: 0.9rem;
-        }
+        .search-input { width: 100%; padding-left: 28px; font-size: 0.9rem; }
 
-        /* --- List --- */
         .list-header {
-            display: flex;
-            justify-content: space-between;
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 16px;
-            padding: 0 4px;
+            display: flex; justify-content: space-between; color: var(--text-muted);
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+            margin-bottom: 16px; padding: 0 4px;
         }
         
         .reset-link {
             background: none; border: none; padding: 0;
-            color: var(--text-muted); cursor: pointer;
-            font-size: 0.75rem;
+            color: var(--text-muted); cursor: pointer; font-size: 0.75rem;
         }
         .reset-link:hover { color: var(--danger); }
 
         .item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 4px;
-            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 4px; border-bottom: 1px solid var(--border);
             transition: background 0.1s;
         }
         .item:hover { background: rgba(255,255,255,0.03); }
 
-        .item-details h3 {
-            font-size: 1rem;
-            font-weight: 500;
-            margin: 0 0 4px 0;
-            color: var(--text-main);
-        }
-        .item-meta {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
+        .item-details h3 { font-size: 1rem; font-weight: 500; margin: 0 0 4px 0; color: var(--text-main); }
+        .item-meta { font-size: 0.8rem; color: var(--text-muted); }
 
-        .item-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .amount {
-            font-weight: 500;
-            font-size: 1rem;
-            color: var(--text-main);
-        }
+        .item-right { display: flex; align-items: center; gap: 20px; }
+        .amount { font-weight: 500; font-size: 1rem; color: var(--text-main); }
 
         .icon-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            opacity: 0.6;
-            transition: opacity 0.2s, color 0.2s;
+            background: none; border: none; color: var(--text-muted);
+            cursor: pointer; padding: 4px; display: flex; align-items: center;
+            opacity: 0.6; transition: opacity 0.2s, color 0.2s;
         }
         .icon-btn:hover { opacity: 1; color: var(--accent); }
         .icon-btn.delete:hover { color: var(--danger); }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 0;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* SVG Sizing */
+        .empty-state { text-align: center; padding: 60px 0; color: var(--text-muted); font-size: 0.9rem; }
         svg { width: 18px; height: 18px; stroke-width: 2; }
 
         @media (max-width: 600px) {
+            header { flex-direction: column; gap: 15px; }
+            .header-actions { width: 100%; justify-content: flex-start; }
             .input-group { grid-template-columns: 1fr; gap: 16px; }
-            .toolbar { overflow-x: auto; padding-bottom: 10px; }
-            .btn-secondary { white-space: nowrap; }
         }
     </style>
 </head>
@@ -281,37 +261,38 @@
 
 <div class="container">
     <header>
-        <h1>Lending Tracker</h1>
-        <p>Live Minimalist Overview</p>
+        <div class="header-left">
+            <h1>Lending Tracker</h1>
+            <p>Live Minimalist Overview</p>
+        </div>
+
+        <!-- TOP RIGHT BUTTONS -->
+        <div class="header-actions">
+            <!-- Import Button -->
+            <label for="fileInput" class="btn-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                Import
+            </label>
+            <input type="file" id="fileInput" accept=".csv, .xlsx, .xls, .json">
+
+            <!-- Export Dropdown -->
+            <div class="dropdown">
+                <button class="btn-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    Export
+                </button>
+                <div class="dropdown-content">
+                    <a onclick="exportExcel()">Excel (.xlsx)</a>
+                    <a onclick="exportCSV()">CSV (.csv)</a>
+                    <a onclick="exportJSON()">JSON (.json)</a>
+                </div>
+            </div>
+        </div>
     </header>
 
     <div class="total-section">
         <span class="total-label" id="totalLabel">Total Outstanding</span>
         <div class="total-amount" id="totalDisplay">₹0.00</div>
-    </div>
-
-    <!-- Toolbar: Import & Exports -->
-    <div class="toolbar">
-        <label for="fileInput" class="btn-secondary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-            Import
-        </label>
-        <input type="file" id="fileInput" accept=".csv, .xlsx, .xls, .json">
-
-        <button class="btn-secondary" onclick="exportExcel()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="8" x2="8" y2="8"></line><line x1="16" y1="16" x2="8" y2="16"></line><line x1="10" y1="12" x2="3" y2="12"></line></svg>
-            Excel
-        </button>
-
-        <button class="btn-secondary" onclick="exportCSV()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-            CSV
-        </button>
-
-        <button class="btn-secondary" onclick="exportJSON()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-            JSON
-        </button>
     </div>
 
     <!-- Input Form -->
@@ -366,14 +347,14 @@
         } catch (e) { return null; }
     }
 
-    // --- IMPORT LOGIC (Multi-Format) ---
+    // --- IMPORT LOGIC ---
     fileInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (!file) return;
 
         const fileName = file.name.toLowerCase();
 
-        // 1. JSON
+        // JSON
         if (fileName.endsWith('.json')) {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -387,7 +368,7 @@
             };
             reader.readAsText(file);
         } 
-        // 2. Excel
+        // Excel
         else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -399,7 +380,7 @@
             };
             reader.readAsArrayBuffer(file);
         }
-        // 3. CSV
+        // CSV
         else if (fileName.endsWith('.csv')) {
             Papa.parse(file, {
                 header: false,
@@ -441,7 +422,7 @@
         fileInput.value = "";
     }
 
-    // --- EXPORT LOGIC (Multi-Format) ---
+    // --- EXPORT LOGIC ---
     function exportExcel() {
         if(transactions.length === 0) return alert("No data.");
         const data = transactions.map(t => ({
@@ -512,11 +493,9 @@
                     </div>
                     <div class="item-right">
                         <span class="amount">${formatINR(t.amount)}</span>
-                        
                         <button class="icon-btn" onclick="startEdit(${index})" title="Edit">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                         </button>
-                        
                         <button class="icon-btn delete" onclick="deleteItem(${index})" title="Delete">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
